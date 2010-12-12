@@ -30,6 +30,7 @@ class ClientHandler(WebHandler):
         'RPC.Core.getEngines',
         'RPC.Core.getUsers',
         'RPC.Core.getPublishedWorksheets',
+        'RPC.Core.getAllWorksheets',
         'RPC.Folder.getRoot',
         'RPC.Folder.create',
         'RPC.Folder.remove',
@@ -233,6 +234,41 @@ class ClientHandler(WebHandler):
             'users_count': len(users),
             'worksheets_count': sum([ len(user['worksheets']) for user in users ]),
         })
+
+    def RPC__Core__getAllWorksheets(self):
+        """
+        
+        """
+        users = []
+
+        for user in User.objects.all():
+            user_worksheets = []
+
+            for worksheet in Worksheet.objects.all():
+                user_worksheets.append({
+                    'uuid': worksheet.uuid,
+                    'name': worksheet.name,
+                    'description': worksheet.description,
+                    'created': jsonrpc.datetime(worksheet.created),
+                    'modified': jsonrpc.datetime(worksheet.modified),
+                    'published': jsonrpc.datetime(worksheet.published),
+                    'engine': {
+                        'uuid': worksheet.engine.uuid,
+                        'name': worksheet.engine.name,
+                    },
+                })
+
+            if len(user_worksheets) > 0:
+                data = {
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'worksheets': user_worksheets,
+                }
+                users.append(data)
+
+
+        self.return_api_result({'users': users})
 
     @jsonrpc.authenticated
     def RPC__Folder__getRoot(self):

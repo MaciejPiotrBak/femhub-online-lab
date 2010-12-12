@@ -16,6 +16,7 @@ class AsyncHandler(WebHandler):
         'RPC.Engine.complete',
         'RPC.Engine.evaluate',
         'RPC.Engine.interrupt',
+        'RPC.Engine.identify',
     ]
 
     def initialize(self):
@@ -88,4 +89,13 @@ class AsyncHandler(WebHandler):
     def RPC__Engine__interrupt(self, uuid, cellid=None):
         """Forward 'interrupt' method call to the assigned service. """
         self.forward(uuid, 'interrupt', {'uuid': uuid, 'cellid': cellid})
+
+    def RPC__Engine__identify(self, uuid):
+        """Return uuid of the service to which the process is attached to. """
+        try:
+            service = self.manager.get_service(uuid)
+        except service.NotAssignedYet:
+            self.return_api_error('no-services-available')
+
+        self.return_api_result({'uuid': service.uuid, 'provider': service.provider})
 
