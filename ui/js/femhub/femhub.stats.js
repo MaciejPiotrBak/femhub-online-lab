@@ -53,7 +53,7 @@ style:null,
                 handler: function() {
 				this.switchStyle();	
 			
-                },
+g                },
                 scope: this,
             },
 		{
@@ -110,7 +110,7 @@ style:null,
 		tag:'canvas',
              id:'myCanvas',
 		height: 1610,
-	width: 500,
+	width: 700,
                    }],
 } 
 }
@@ -177,7 +177,7 @@ style:null,
                 Ext.each(result.users, function(user) {
                     Ext.each(user.worksheets, function(worksheet) {
                         this.dtProcess.push(worksheet.uuid);
-			this.dtEngine.push(worksheet.uuid);
+			this.dtEngine.push(worksheet.engine.name);
                     }, this);
                 }, this);
             },this);

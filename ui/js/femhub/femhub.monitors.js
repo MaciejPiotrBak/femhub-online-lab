@@ -1,7 +1,6 @@
 function Monitors(){
 alpha=null;
 display=null;
-win=null;
 cat= null;
 id= null;
 ready= false;
@@ -50,6 +49,9 @@ visible=null;
 level=null;
 service=null;
 engineType=null;
+memoryDis=null;
+gotMemory=null;
+memoryTotal=null;
 }
 
 Monitors.prototype.getServiceUuid = function(proc) {
@@ -136,7 +138,9 @@ this.textFont='12px sans-serif';
 this.level=1;
 this.visible=false;
 this.engineType='';
-
+this.memoryDis=[0,0];
+this.gotMemory=false;
+this.memoryTotal=0;
 },
 
 Monitors.prototype.getInfo = function(){
@@ -206,9 +210,17 @@ FEMhub.RPC.Engine.stat({uuid: this.id}, function(result) {
                             {
                                 z=0;
                             }
+				if (z>100){
+				z=100;
+				}
                             this.cpuperI.push(z);
-                        
+                        	
                             this.memperI.shift();
+				this.memoryDis=[result.memory.rss,result.memory.vms]
+				if ((this.memperI[29]>0)&&(this.gotMemory==false)){
+				this.gotMemory=true;
+				this.memoryTotal=parseInt((result.memory.rss/this.memperI[29])*100);
+				}
                             this.memperI.push(result.memory.percent);
                         	
 						this.counterI+=1;
@@ -301,12 +313,18 @@ Monitors.prototype.printStats = function(){
 	context.translate(this.transXT,this.transYT);
 	context.scale(this.sXT,this.sYT);
 	context.rotate(this.rotT);
-	context.clearRect(0,0,200,10);
+	context.clearRect(0,0,300,100);
 	context.strokeStyle=this.textColor;
 	context.font=this.textFont;
 	context.save();
-	context.strokeText(this.labelM,this.labelMX,this.labelMY);
-	context.strokeText('Python',this.labelMX,this.labelMY+20);
+	context.strokeText('Service: '+this.id,this.labelMX,this.labelMY);
+	context.strokeText(this.labelM,this.labelMX,this.labelMY+28);
+	context.strokeText(this.engineType,this.labelMX,this.labelMY+70);
+	if (this.cat=='mem'){
+	context.strokeText('Total: '+this.memoryTotal,this.labelMX,this.labelMY+14);
+	context.strokeText('RSS: '+this.memoryDis[0],this.labelMX,this.labelMY+42);
+	context.strokeText('VMS: '+this.memoryDis[1],this.labelMX,this.labelMY+56);
+	}
 	//context.strokeText(parseInt(dtArray[29])+'%',this.calcX,this.calcY);
 	context.restore();
 	context.restore();
@@ -346,7 +364,7 @@ Monitors.prototype.drawStats = function() {
 	context.scale(this.sX,this.sY);
 	context.rotate(this.rot);
 	context.globalAlpha=this.alpha;
-	context.clearRect(0,0,400,220);
+	context.clearRect(0,0,500,220);
 	context.save();
    
 
